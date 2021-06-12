@@ -8,3 +8,7 @@ async function getStatistics(){
 
 
 getStatistics()
+
+
+//TODO: Make statistics useful, get good plots and mean values
+
