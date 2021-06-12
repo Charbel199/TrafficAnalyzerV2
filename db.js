@@ -18,8 +18,8 @@ const pool = new Pool({
 
 const execute = async (query) => {
     try {
-        await pool.query(query);  // sends queries
-        return true;
+        var response = await pool.query(query);  // sends queries
+        return response;
     } catch (error) {
         console.error(error.stack);
         return false;

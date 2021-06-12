@@ -1,61 +1,82 @@
 const puppeteer = require('puppeteer');
 const readline = require('readline');
 const db = require('./db')
+const config = require('./config')
 
-let running = false;
+
+let browsers = [];
 console.log("Press 'q' to exit the program, press 'l' to start the program.")
 readline.emitKeypressEvents(process.stdin);
 process.stdin.setRawMode(true);
 process.stdin.on('keypress', (str, key) => {
   if (key.ctrl && key.name === 'c') {
+    console.log('There are ',browsers.length,' browsers')
+    for(const b of browsers){
+        console.log("Closing browser ...")
+        b.close()
+    }
+    browsers = []
+    console.log("Closing program ...")
     process.exit();
   } else {
     //console.log(`You pressed the "${str}" key`);
     if(str == 'q'){
-        if(!running){
+        if(browsers.length==0){
             console.log("Program already closed ...")
         }else{
-            running = false;
+            console.log('There are ',browsers.length,' browsers')
+            for(const b of browsers){
+                console.log("Closing browser ...")
+                b.close()
+            }
+            browsers = []
+
             console.log("Closing program ...")
+            //process.exit();
         }
     }
     if(str == 'l'){
-        if(running){
+        if(browsers.length!=0){
             console.log("Program already running ...")
+          
         }
         else{
             console.log("Starting program ...")
-            running = true;
-            scrape()
+            console.log('Number of processes: ',config.length)
+            for(const c of config){
+                scrape(c.url,c.start,c.destination,c.interval)
+            }
+ 
+          
         }
     }
   }
 });
 
 
-async function scrape() {
+async function scrape(url,start,destination,interval) {
     const browser = await puppeteer.launch({
         "headless": false,
         "args": ["--fast-start", "--disable-extensions", "--no-sandbox"],
         "ignoreHTTPSErrors": true
     });
+    browsers.push(browser)
     try{
         const page = await browser.newPage();
         await page.setJavaScriptEnabled(true)
-        await page.goto('https://www.google.com/maps/dir/Lebanese+American+University,+Byblos+Campus,+Blat,+Lebanon/Fanar,+Lebanon/@34.0010134,35.4776456,11z/data=!3m1!4b1!4m14!4m13!1m5!1m1!1s0x151f5b485f22ba8b:0xb777d642de56b49a!2m2!1d35.6744347!2d34.1155614!1m5!1m1!1s0x151f3d919385703f:0xcdd985b12eddd900!2m2!1d35.578307!2d33.8798483!3e0');
+        await page.goto(url);
         await page.click("#yDmH0d > c-wiz > div > div > div > div.NIoIEf > div.G4njw > div.AIC7ge > form > div.lssxud > div > button > span");
         await page .waitForSelector('.section-directions-trip-duration');
     
-        while (true && running) {
+        while (true & browsers.length!=0) {
             let data = await page.evaluate(() => {
                 let minute = document.body.querySelector(".section-directions-trip-duration").textContent
                 return {
                     minute
                 }
             });
-            console.log(data)
+        
             //Main logic 
-
             var regex = /\d+/g;
             var numbers = parseInt(data.minute.match(regex)[0]);  // creates array from matches
             if(data.minute.indexOf('min')!=-1){
@@ -64,24 +85,21 @@ async function scrape() {
                 duration = numbers * 60
             }
             date = new Date().toISOString();
-
-            await db.execute(`INSERT INTO traffic (id, start, destination, duration, time) VALUES (DEFAULT, 'Fanar', 'LAU Jbeil', ${duration}, '${date}')`)
-           
+            await db.execute(`INSERT INTO traffic (id, start, destination, duration, time) VALUES (DEFAULT, '${start}', '${destination}', ${duration}, '${date}')`)
+            console.log("From ",start," to ",destination,", duration: ",duration)
             //End main logic
     
-    
-    
+
+            await new Promise(resolve => setTimeout(resolve, parseInt(interval)*1000*60));
             await page.reload();
-            await new Promise(resolve => setTimeout(resolve, 5000));
-            if(!running){
-                await browser.close()
-            }
         }
-       console.log("Program closed ...")
+
     }catch(error){
         console.log("Error caught, closing browser ...")
         console.log(error)
         await browser.close()
+    }finally{
+        await browser.close();
     }
    
 
