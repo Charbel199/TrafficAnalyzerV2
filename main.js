@@ -47,24 +47,25 @@ async function scrape() {
         await page .waitForSelector('.section-directions-trip-duration');
     
         while (true && running) {
-            let minute = await page.evaluate(() => {
-                let minuteElement = document.body.querySelector(".section-directions-trip-duration").textContent
-                
-                return minuteElement
+            let data = await page.evaluate(() => {
+                let minute = document.body.querySelector(".section-directions-trip-duration").textContent
+                return {
+                    minute
+                }
             });
-            
+            console.log(data)
             //Main logic 
+
             var regex = /\d+/g;
-            var numbers = parseInt(minute.match(regex)[0]);  // creates array from matches
-            if(minute.indexOf('min')!=-1){
+            var numbers = parseInt(data.minute.match(regex)[0]);  // creates array from matches
+            if(data.minute.indexOf('min')!=-1){
                 duration = numbers
             }else{
                 duration = numbers * 60
             }
-            console.log(duration);
             date = new Date().toISOString();
-            console.log(date)
-            await db.execute(`INSERT INTO traffic (id, start, destination, duration, time) VALUES (DEFAULT, 'jdeideh', 'jbeil', 30, '${date}')`)
+
+            await db.execute(`INSERT INTO traffic (id, start, destination, duration, time) VALUES (DEFAULT, 'Fanar', 'LAU Jbeil', ${duration}, '${date}')`)
            
             //End main logic
     
@@ -79,6 +80,7 @@ async function scrape() {
        console.log("Program closed ...")
     }catch(error){
         console.log("Error caught, closing browser ...")
+        console.log(error)
         await browser.close()
     }
    
@@ -87,3 +89,5 @@ async function scrape() {
 
 };
 
+//TODO: Seperate time into, day of the week, hour/minute 
+//Create parser for URL, Start and destination
