@@ -5,11 +5,11 @@ console.log(process.env.CONNECTON_STRING)
 var conString = process.env.CONNECTON_STRING;
 
 const pool = new Pool({
-    host: process.env.HOST,
-    port: process.env.PORT,
-    user: process.env.USER,
-    password: process.env.PASSWORD,
-    database: process.env.DATABASE,
+    host: process.env.HOST_PRODUCTION,
+    port: process.env.PORT_PRODUCTION,
+    user: process.env.USER_PRODUCTION,
+    password: process.env.PASSWORD_PRODUCTION,
+    database: process.env.DATABASE_PRODUCTION,
     max: 20,
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 2000,
@@ -32,6 +32,7 @@ const text = `
 	    "start" VARCHAR(200) NOT NULL,
 	    "destination" VARCHAR(200) NOT NULL,
         "duration" integer,
+        "day" integer,
         "time" TIMESTAMP,
 	    PRIMARY KEY ("id")
     );`;

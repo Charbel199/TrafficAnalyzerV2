@@ -85,7 +85,8 @@ async function scrape(url,start,destination,interval) {
                 duration = numbers * 60
             }
             date = new Date().toISOString();
-            await db.execute(`INSERT INTO traffic (id, start, destination, duration, time) VALUES (DEFAULT, '${start}', '${destination}', ${duration}, '${date}')`)
+            day = new Date(date).getDay()
+            await db.execute(`INSERT INTO traffic (id, start, destination, duration,day, time) VALUES (DEFAULT, '${start}', '${destination}', ${duration}, ${day},'${date}')`)
             console.log("From ",start," to ",destination,", duration: ",duration)
             //End main logic
     
@@ -107,5 +108,3 @@ async function scrape(url,start,destination,interval) {
 
 };
 
-//TODO: Seperate time into, day of the week, hour/minute 
-//Create parser for URL, Start and destination
