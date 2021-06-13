@@ -10,8 +10,8 @@ const pool = new Pool({
     password: process.env.PASSWORD_PRODUCTION,
     database: process.env.DATABASE_PRODUCTION,
     max: 20,
-    idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 2000,
+    idleTimeoutMillis: 0,
+    connectionTimeoutMillis: 0,
   });
 
 

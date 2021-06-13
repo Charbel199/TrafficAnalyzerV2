@@ -122,7 +122,7 @@ if(process.env.NODE_ENV == 'development'){
 
 async function scrape(url,start,destination,interval) {
     const browser = await puppeteer.launch({
-        headless: true,
+        headless: false,
         args: ['--no-sandbox','--disable-setuid-sandbox']
     });
     browsers.push(browser)
@@ -132,10 +132,12 @@ async function scrape(url,start,destination,interval) {
         await page.goto(url);
         await page.click("#yDmH0d > c-wiz > div > div > div > div.NIoIEf > div.G4njw > div.AIC7ge > form > div.lssxud > div > button > span");
         await page .waitForSelector('.section-directions-trip-duration');
-        await new Promise(resolve => setTimeout(resolve, 3000));
+        
         while (true & browsers.length!=0) {
+            await page.reload();
+            await new Promise(resolve => setTimeout(resolve, 3000));
             let data = await page.evaluate(() => {
-                
+                console.log("QUERY : ",document.body.querySelector(".section-directions-trip-duration"))
                 let minute = document.body.querySelector(".section-directions-trip-duration").textContent
                 return {
                     minute
@@ -158,7 +160,7 @@ async function scrape(url,start,destination,interval) {
     
 
             await new Promise(resolve => setTimeout(resolve, parseInt(interval)*1000*60));
-            await page.reload();
+
         }
 
     }catch(error){
