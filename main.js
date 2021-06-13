@@ -23,7 +23,7 @@ app.use(cors({ // enables CORS
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.get('/run',(req,res)=>{
+app.get('/run/:interval?',(req,res)=>{
     try{
         if(browsers.length!=0){
             console.log("Program already running ...")
@@ -32,10 +32,27 @@ app.get('/run',(req,res)=>{
         else{
             console.log("Starting program ...")
             console.log('Number of processes: ',config.length)
+
+           
             for(const c of config){
-                scrape(c.url,c.start,c.destination,c.interval)
+                if(req.params.interval!=null){
+                    try{
+                   
+                    interval = parseFloat(req.params.interval)
+                        if(isNaN(interval)){
+                            interval = c.interval
+                        }
+                    }
+                    catch(exception){
+                        interval = c.interval
+                    }
+                }else{
+                    interval = c.interval
+                }
+                console.log('Interval: ',interval)
+                scrape(c.url,c.start,c.destination,interval)
             }
-        res.send('Successful')
+        res.send('Successful Run')
     }
 }catch(error){ res.send('Error')}
        
@@ -56,7 +73,7 @@ app.get('/stop',(req,res)=>{
             console.log("Closing program ...")
             //process.exit();
         }
-        res.send('Successful')
+        res.send('Successful Close')
     }catch(error){ res.send('Error')}
        
     
