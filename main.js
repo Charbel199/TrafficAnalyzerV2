@@ -132,9 +132,10 @@ async function scrape(url,start,destination,interval) {
         await page.goto(url);
         await page.click("#yDmH0d > c-wiz > div > div > div > div.NIoIEf > div.G4njw > div.AIC7ge > form > div.lssxud > div > button > span");
         await page .waitForSelector('.section-directions-trip-duration');
-    
+        await new Promise(resolve => setTimeout(resolve, 3000));
         while (true & browsers.length!=0) {
             let data = await page.evaluate(() => {
+                
                 let minute = document.body.querySelector(".section-directions-trip-duration").textContent
                 return {
                     minute
