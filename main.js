@@ -106,6 +106,7 @@ if(process.env.NODE_ENV == 'development'){
                 for(const c of config){
                     scrape(c.url,c.start,c.destination,c.interval)
                 }
+                console.log("Programs are now running ...")
      
               
             }
