@@ -159,7 +159,7 @@ async function scrape(url,start,destination,interval) {
             //End main logic
     
 
-            await new Promise(resolve => setTimeout(resolve, parseInt(interval)*1000*60));
+            await new Promise(resolve => setTimeout(resolve, parseFloat(interval)*1000*60));
 
         }
 
@@ -167,10 +167,11 @@ async function scrape(url,start,destination,interval) {
         console.log("Error caught, closing browser ...")
         console.log(error)
         await browser.close()
-    }finally{
-        await browser.close();
+        const index = browsers.indexOf(browser);
+        if (index > -1) {
+            browsers.splice(index, 1);
+        }
     }
-   
 
 
 
