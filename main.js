@@ -122,7 +122,7 @@ if(process.env.NODE_ENV == 'development'){
 
 async function scrape(url,start,destination,interval) {
     const browser = await puppeteer.launch({
-        headless: false,
+        headless: true, 
         args: ['--no-sandbox','--disable-setuid-sandbox']
     });
     browsers.push(browser)
