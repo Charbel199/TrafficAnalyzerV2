@@ -2,25 +2,47 @@ const puppeteer = require('puppeteer');
 const readline = require('readline');
 const db = require('./db')
 const config = require('./config')
+const dotenv = require("dotenv");
+const express = require("express");
+const cors = require("cors");
+const bodyParser = require("body-parser");
+dotenv.config();
+const app = express();
+const port = process.env.PORT || 8080;
 
 
 let browsers = [];
-console.log("Press 'q' to exit the program, press 'l' to start the program.")
-readline.emitKeypressEvents(process.stdin);
-process.stdin.setRawMode(true);
-process.stdin.on('keypress', (str, key) => {
-  if (key.ctrl && key.name === 'c') {
-    console.log('There are ',browsers.length,' browsers')
-    for(const b of browsers){
-        console.log("Closing browser ...")
-        b.close()
+//For development
+app.use(cors({ // enables CORS 
+  credentials: true, 
+  origin: true, 
+  methods: ['GET','POST'], 
+  allowedHeaders: ['Content-Type', 'Authorization'] 
+}));
+//Interpreting JSON
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+app.get('/run',(req,res)=>{
+    try{
+        if(browsers.length!=0){
+            console.log("Program already running ...")
+          
+        }
+        else{
+            console.log("Starting program ...")
+            console.log('Number of processes: ',config.length)
+            for(const c of config){
+                scrape(c.url,c.start,c.destination,c.interval)
+            }
+        res.send('Successful')
     }
-    browsers = []
-    console.log("Closing program ...")
-    process.exit();
-  } else {
-    //console.log(`You pressed the "${str}" key`);
-    if(str == 'q'){
+}catch(error){ res.send('Error')}
+       
+    
+})
+app.get('/stop',(req,res)=>{
+    try{
         if(browsers.length==0){
             console.log("Program already closed ...")
         }else{
@@ -34,30 +56,73 @@ process.stdin.on('keypress', (str, key) => {
             console.log("Closing program ...")
             //process.exit();
         }
-    }
-    if(str == 'l'){
-        if(browsers.length!=0){
-            console.log("Program already running ...")
-          
+        res.send('Successful')
+    }catch(error){ res.send('Error')}
+       
+    
+})
+
+
+if(process.env.NODE_ENV == 'development'){
+
+    console.log("Press 'q' to exit the program, press 'l' to start the program.")
+    readline.emitKeypressEvents(process.stdin);
+    process.stdin.setRawMode(true);
+    process.stdin.on('keypress', (str, key) => {
+      if (key.ctrl && key.name === 'c') {
+        console.log('There are ',browsers.length,' browsers')
+        for(const b of browsers){
+            console.log("Closing browser ...")
+            b.close()
         }
-        else{
-            console.log("Starting program ...")
-            console.log('Number of processes: ',config.length)
-            for(const c of config){
-                scrape(c.url,c.start,c.destination,c.interval)
+        browsers = []
+        console.log("Closing program ...")
+        process.exit();
+      } else {
+        //console.log(`You pressed the "${str}" key`);
+        if(str == 'q'){
+            if(browsers.length==0){
+                console.log("Program already closed ...")
+            }else{
+                console.log('There are ',browsers.length,' browsers')
+                for(const b of browsers){
+                    console.log("Closing browser ...")
+                    b.close()
+                }
+                browsers = []
+    
+                console.log("Closing program ...")
+                //process.exit();
             }
- 
-          
         }
-    }
-  }
-});
+        if(str == 'l'){
+            if(browsers.length!=0){
+                console.log("Program already running ...")
+              
+            }
+            else{
+                console.log("Starting program ...")
+                console.log('Number of processes: ',config.length)
+                for(const c of config){
+                    scrape(c.url,c.start,c.destination,c.interval)
+                }
+     
+              
+            }
+        }
+      }
+    });
+}
+
+
+
+
 
 
 async function scrape(url,start,destination,interval) {
     const browser = await puppeteer.launch({
-        "headless": false,
-        "args": ["--fast-start", "--disable-extensions", "--no-sandbox"],
+        "headless": true,
+        "args": ["--fast-start", "--disable-extensions", "--no-sandbox", "--disable-setuid-sandbox"],
         "ignoreHTTPSErrors": true
     });
     browsers.push(browser)
@@ -108,3 +173,6 @@ async function scrape(url,start,destination,interval) {
 
 };
 
+app.listen(port, () => {
+    console.log("We are live on " + port);
+  });

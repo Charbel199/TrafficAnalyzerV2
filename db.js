@@ -1,12 +1,11 @@
 const { Pool } = require('pg')
 const dotenv = require("dotenv");
 dotenv.config();
-console.log(process.env.CONNECTON_STRING)
-var conString = process.env.CONNECTON_STRING;
+
 
 const pool = new Pool({
     host: process.env.HOST_PRODUCTION,
-    port: process.env.PORT_PRODUCTION,
+    port: process.env.DB_PORT_PRODUCTION,
     user: process.env.USER_PRODUCTION,
     password: process.env.PASSWORD_PRODUCTION,
     database: process.env.DATABASE_PRODUCTION,
