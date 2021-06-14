@@ -163,11 +163,12 @@ async function scrape(url,start,destination,interval) {
         
             //Main logic 
             var regex = /\d+/g;
-            var numbers = parseInt(data.minute.match(regex)[0]);  // creates array from matches
-            if(data.minute.indexOf('min')!=-1){
-                duration = numbers
-            }else{
-                duration = numbers * 60
+            var numbers = data.minute.match(regex);  // creates array from matches
+            if(data.minute.indexOf('hr')!=-1){
+                duration = parseInt(numbers[0])*60+parseInt(numbers[1])
+            }
+            else{
+                duration = parseInt(numbers[0])
             }
             date = new Date().toISOString();
             day = new Date(date).getDay()
