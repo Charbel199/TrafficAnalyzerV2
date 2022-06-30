@@ -10,6 +10,13 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 8080;
 
+const swaggerUi = require('swagger-ui-express'),
+swaggerDocument = require('./swagger.json');
+app.use(
+  '/api-docs',
+  swaggerUi.serve, 
+  swaggerUi.setup(swaggerDocument)
+);
 
 let browsers = [];
 //For development
@@ -147,15 +154,16 @@ async function scrape(url,start,destination,interval) {
         const page = await browser.newPage();
         await page.setJavaScriptEnabled(true)
         await page.goto(url);
-        await page.click("#yDmH0d > c-wiz > div > div > div > div.NIoIEf > div.G4njw > div.AIC7ge > form > div.lssxud > div > button > span");
-        await page .waitForSelector('.section-directions-trip-duration');
+
+        await page .waitForSelector('#section-directions-trip-0 > div.MespJc > div:nth-child(1) > div.XdKEzd > div.Fk3sm.fontHeadlineSmall.delay-medium > span:nth-child(1)');
         
         while (true & browsers.length!=0) {
             await page.reload();
             await new Promise(resolve => setTimeout(resolve, 3000));
             let data = await page.evaluate(() => {
-                console.log("QUERY : ",document.body.querySelector(".section-directions-trip-duration"))
-                let minute = document.body.querySelector(".section-directions-trip-duration").textContent
+            	
+                console.log("QUERY : ",document.body.querySelector("#section-directions-trip-0 > div.MespJc > div:nth-child(1) > div.XdKEzd > div.Fk3sm.fontHeadlineSmall.delay-medium > span:nth-child(1)"))
+                let minute = document.body.querySelector("#section-directions-trip-0 > div.MespJc > div:nth-child(1) > div.XdKEzd > div.Fk3sm.fontHeadlineSmall.delay-medium > span:nth-child(1)").textContent
                 return {
                     minute
                 }
